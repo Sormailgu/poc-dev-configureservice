@@ -1,0 +1,75 @@
+{
+  openapi: "3.0.1",
+  info: { title: "ConfigureService", version: "1.0" },
+  paths:
+    {
+      /api/AccountType/GetAccountTypeList:
+        {
+          get:
+            {
+              tags: ["AccountType"],
+              responses:
+                {
+                  200:
+                    {
+                      description: "Success",
+                      content:
+                        {
+                          text/plain:
+                            {
+                              schema:
+                                {
+                                  type: "array",
+                                  items:
+                                    {
+                                      $ref: "#/components/schemas/AccountTypeResponseDto",
+                                    },
+                                },
+                            },
+                          application/json:
+                            {
+                              schema:
+                                {
+                                  type: "array",
+                                  items:
+                                    {
+                                      $ref: "#/components/schemas/AccountTypeResponseDto",
+                                    },
+                                },
+                            },
+                          text/json:
+                            {
+                              schema:
+                                {
+                                  type: "array",
+                                  items:
+                                    {
+                                      $ref: "#/components/schemas/AccountTypeResponseDto",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
+  components:
+    {
+      schemas:
+        {
+          AccountTypeResponseDto:
+            {
+              type: "object",
+              properties:
+                {
+                  name: { type: "string", nullable: true },
+                  description: { type: "string", nullable: true },
+                  id: { type: "string", nullable: true },
+                  isActive: { type: "boolean" },
+                },
+              additionalProperties: false,
+            },
+        },
+    },
+}
