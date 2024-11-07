@@ -12,33 +12,19 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-      - echo Retrieving Git commit hash and timestamp...
-      - |
-        if [ -z "$CODEBUILD_RESOLVED_SOURCE_VERSION" ]; then
-          CODEBUILD_RESOLVED_SOURCE_VERSION=$(git rev-parse HEAD)
-        fi
-      - |
-        if [[ $CODEBUILD_RESOLVED_SOURCE_VERSION =~ ^[0-9a-f]{7,40}$ ]]; then
-          COMMIT_HASH=$CODEBUILD_RESOLVED_SOURCE_VERSION
-        else
-          COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
-        fi
-      - TIMESTAMP=$(date +%Y%m%d%H%M%S)
-      - IMAGE_TAG=${COMMIT_HASH}-${TIMESTAMP}
-      - echo "Commit Hash: $COMMIT_HASH"
-      - echo "Timestamp: $TIMESTAMP"
-      - echo "Image Tag: $IMAGE_TAG"
 
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/poc-dev/configureservice:$IMAGE_TAG .
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/poc-dev/configureservice:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+      - echo Tagging the Docker image...
+      - docker tag $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/poc-dev/configureservice:$CODEBUILD_RESOLVED_SOURCE_VERSION $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/poc-dev/configureservice:latest
+      - echo Pushing the Docker image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/poc-dev/configureservice:$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/poc-dev/configureservice:latest
 
   post_build:
     commands:
-      - echo Pushing the Docker image...
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/poc-dev/configureservice:$IMAGE_TAG
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/poc-dev/configureservice:latest
       - echo Build and push completed successfully.
 
 artifacts:
