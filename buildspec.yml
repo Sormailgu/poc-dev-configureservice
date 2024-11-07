@@ -17,9 +17,9 @@ phases:
         COMMIT_HASH=$(git rev-parse --short HEAD)
       - TIMESTAMP=$(date +%Y%m%d%H%M%S)
       - IMAGE_TAG=${COMMIT_HASH}-${TIMESTAMP}
-      - echo "Commit Hash: $COMMIT_HASH"
-      - echo "Timestamp: $TIMESTAMP"
-      - echo "Image Tag: $IMAGE_TAG"
+      - echo "Commit Hash:$COMMIT_HASH"
+      - echo "Timestamp:$TIMESTAMP"
+      - echo "Image Tag:$IMAGE_TAG"
 
   build:
     commands:
