@@ -13,7 +13,16 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
       - echo Retrieving Git commit hash and timestamp...
-      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - |
+        if [ -z "$CODEBUILD_RESOLVED_SOURCE_VERSION" ]; then
+          CODEBUILD_RESOLVED_SOURCE_VERSION=$(git rev-parse HEAD)
+        fi
+      - |
+        if [[ $CODEBUILD_RESOLVED_SOURCE_VERSION =~ ^[0-9a-f]{7,40}$ ]]; then
+          COMMIT_HASH=$CODEBUILD_RESOLVED_SOURCE_VERSION
+        else
+          COMMIT_HASH=$(git rev-parse HEAD | cut -c 1-7)
+        fi
       - TIMESTAMP=$(date +%Y%m%d%H%M%S)
       - IMAGE_TAG=${COMMIT_HASH}-${TIMESTAMP}
       - echo "Commit Hash: $COMMIT_HASH"
@@ -24,8 +33,6 @@ phases:
     commands:
       - echo Building the Docker image...
       - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/poc-dev/configureservice:$IMAGE_TAG .
-      - echo Tagging the Docker image...
-      - docker tag $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/poc-dev/configureservice:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/poc-dev/configureservice:latest
 
   post_build:
     commands:
